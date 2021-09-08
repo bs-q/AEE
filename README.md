@@ -1,2 +1,3 @@
-# CUER
-Checking university entry requirements application
+# AEE
+A system for advising education enrollment
+
