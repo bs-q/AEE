@@ -66,6 +66,7 @@ public class AuthController {
 				userDetails.getEmail(),
 				roles));
 		baseResponse.setMessage("Signin success");
+		baseResponse.setResult(true);
 		return baseResponse;
 	}
 
@@ -121,6 +122,7 @@ public class AuthController {
 		user.setRoles(roles);
 		userRepository.save(user);
 		baseResponse.setMessage("User registered successfully!");
+		baseResponse.setResult(true);
 		return baseResponse;
 	}
 }
