@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class BaseResponse<T> {
-    private Boolean result = true;
+    private Boolean result = false;
     private String code = null;
     private T data = null;
     private String message = null;
