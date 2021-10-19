@@ -8,24 +8,18 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-import java.util.Set;
 
 @Data
-@Api
 public class CreateAccountForm {
-    @NotEmpty(message = "firebaseToken can not be empty")
-    @ApiModelProperty(name = "firebaseToken", required = true)
+    @NotBlank
     private String firebaseToken;
-    @NotEmpty(message = "firebaseUserId can not be empty")
-    @ApiModelProperty(name = "firebaseUserId", required = true)
+    @NotBlank
     private String firebaseUserId;
 
     @NotBlank
     @Size(max = 50)
     @Email
     private String email;
-
-    private Set<String> role;
 
     @NotBlank
     @Size(min = 6, max = 40)

@@ -6,10 +6,12 @@ import com.aee.service.mapper.AuthMapper;
 import com.aee.service.models.ERole;
 import com.aee.service.models.Role;
 import com.aee.service.models.User;
+import com.aee.service.models.firebase.FbUserDetail;
 import com.aee.service.payload.request.FirebaseLoginRequest;
 import com.aee.service.payload.request.LoginRequest;
 import com.aee.service.payload.response.BaseResponse;
 import com.aee.service.payload.response.JwtResponse;
+import com.aee.service.payload.response.LoginResponse;
 import com.aee.service.repository.RoleRepository;
 import com.aee.service.repository.UserRepository;
 import com.aee.service.security.jwt.JwtUtils;
@@ -20,6 +22,7 @@ import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,24 +67,24 @@ public class AuthController {
 	AuthMapper authMapper;
 
 	@PostMapping(value = "/signin", produces = MediaType.APPLICATION_JSON_VALUE)
-	public BaseResponse<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+	public BaseResponse<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+		Authentication authentication = null;
+		BaseResponse<LoginResponse> baseResponse = new BaseResponse<>();
 
-		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-
+		try {
+			authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+		} catch (AuthenticationException e){
+			baseResponse.setMessage("Wrong password");
+			return baseResponse;
+		}
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
-		List<String> roles = userDetails.getAuthorities().stream()
-				.map(GrantedAuthority::getAuthority)
-				.collect(Collectors.toList());
-		BaseResponse<JwtResponse> baseResponse = new BaseResponse<>();
-		baseResponse.setData(new JwtResponse(jwt,
-				userDetails.getId(),
-				userDetails.getUsername(),
-				userDetails.getEmail(),
-				roles));
+		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+		LoginResponse response = authMapper.fromUserToLoginResponse(userDetails);
+		response.setToken(jwt);
+		baseResponse.setData(response);
 		baseResponse.setMessage("Signin success");
 		baseResponse.setResult(true);
 		return baseResponse;
@@ -142,9 +145,12 @@ public class AuthController {
 		Role userRole = roleRepository.findByName(ERole.ROLE_USER)
 				.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 		roles.add(userRole);
+		FbUserDetail fbUserDetail = response.getBody().getUsers().get(0).getProviderUserInfo().get(0);
 		user = authMapper.fromCreateFormToAccount(createCustomerForm);
 		user.setRoles(roles);
-		user.setUsername(response.getBody().getUsers().get(0).getProviderUserInfo().get(0).getDisplayName());
+		user.setUsername(fbUserDetail.getDisplayName());
+		user.setPassword(encoder.encode(createCustomerForm.getPassword()));
+		user.setAvatarPath(fbUserDetail.getPhotoUrl());
 		baseResponse.setMessage("check success, this email can be used to register");
 		baseResponse.setResult(true);
 		baseResponse.setMessage("Register customer success");

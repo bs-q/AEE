@@ -1,6 +1,7 @@
 package com.aee.service.models;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,8 +14,7 @@ import javax.validation.constraints.Size;
 @Entity
 @Table(	name = "users", 
 		uniqueConstraints = { 
-			@UniqueConstraint(columnNames = "username"),
-			@UniqueConstraint(columnNames = "email") 
+			@UniqueConstraint(columnNames = "email")
 		})
 @Data
 public class User extends BaseModel {
@@ -41,12 +41,12 @@ public class User extends BaseModel {
 				inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
 
-	public User() {
-	}
+	private String avatarPath;
 
-	public User(String username, String email, String password) {
-		this.username = username;
-		this.email = email;
-		this.password = password;
+	private String uid;
+
+	private String token;
+
+	public User() {
 	}
 }
