@@ -2,19 +2,18 @@ package com.aee.service.controllers;
 
 import com.aee.service.form.CheckAccountForm;
 import com.aee.service.form.CreateAccountForm;
+import com.aee.service.mapper.AuthMapper;
 import com.aee.service.models.ERole;
 import com.aee.service.models.Role;
 import com.aee.service.models.User;
 import com.aee.service.payload.request.FirebaseLoginRequest;
 import com.aee.service.payload.request.LoginRequest;
-import com.aee.service.payload.request.SignupRequest;
 import com.aee.service.payload.response.BaseResponse;
 import com.aee.service.payload.response.JwtResponse;
 import com.aee.service.repository.RoleRepository;
 import com.aee.service.repository.UserRepository;
 import com.aee.service.security.jwt.JwtUtils;
 import com.aee.service.security.services.UserDetailsImpl;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -58,14 +57,17 @@ public class AuthController {
 	@Autowired
 	RestTemplate restTemplate;
 
-	@Value("${firebase.account.api.key}")
+	@Value("${firebase.customer.api.key}")
 	String accountKey;
+
+	@Autowired
+	AuthMapper authMapper;
 
 	@PostMapping(value = "/signin", produces = MediaType.APPLICATION_JSON_VALUE)
 	public BaseResponse<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
 		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+				new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
@@ -85,61 +87,6 @@ public class AuthController {
 		return baseResponse;
 	}
 
-	@PostMapping("/signup")
-	public BaseResponse<JwtResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		BaseResponse<JwtResponse> baseResponse = new BaseResponse<>();
-		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-			baseResponse.setMessage("Error: Username is already taken!");
-			baseResponse.setResult(false);
-			return baseResponse;
-		}
-
-		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-			baseResponse.setMessage("Error: Email is already in use!");
-			baseResponse.setResult(false);
-			return baseResponse;
-		}
-
-		// Create new user's account
-		User user = new User(signUpRequest.getUsername(), 
-							 signUpRequest.getEmail(),
-							 encoder.encode(signUpRequest.getPassword()));
-
-		Set<String> strRoles = signUpRequest.getRole();
-		Set<Role> roles = new HashSet<>();
-
-		if (strRoles == null) {
-			Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-			roles.add(userRole);
-		} else {
-			strRoles.forEach(role -> {
-				switch (role) {
-				case "admin":
-					Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-					roles.add(adminRole);
-
-					break;
-				case "mod":
-					Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-					roles.add(modRole);
-
-					break;
-				default:
-					Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-					roles.add(userRole);
-				}
-			});
-		}
-		user.setRoles(roles);
-		userRepository.save(user);
-		baseResponse.setMessage("User registered successfully!");
-		baseResponse.setResult(true);
-		return baseResponse;
-	}
 
 	@PostMapping(value = "/check-register", produces = MediaType.APPLICATION_JSON_VALUE)
 	public BaseResponse<String> checkRegister(@Valid @RequestBody CheckAccountForm checkAccountForm, BindingResult bindingResult){
@@ -155,12 +102,16 @@ public class AuthController {
 		ResponseEntity<FirebaseLoginRequest> response = restTemplate.exchange(url, HttpMethod.POST, entity, FirebaseLoginRequest.class);
 		FirebaseLoginRequest firebaseLoginDto = response.getBody();
 		if(firebaseLoginDto.getUsers().isEmpty() || !firebaseLoginDto.validationAccountData(checkAccountForm)){
-
 			baseResponse.setMessage("firebase token invalid");
 			return baseResponse;
 		}
-
-		// TODO check account backend
+		User user = userRepository.findByUid(checkAccountForm.getFirebaseUserId()).orElse(null);
+		if (user==null){
+			baseResponse.setMessage("email already used");
+			return baseResponse;
+		}
+		baseResponse.setMessage("check success, this email can be used to register");
+		baseResponse.setResult(true);
 		return baseResponse;
 	}
 	@Transactional
@@ -182,9 +133,20 @@ public class AuthController {
 			baseResponse.setMessage("firebase token invalid");
 			return baseResponse;
 		}
-
-		// TODO check account backend
-
+		User user = userRepository.findByUid(createCustomerForm.getFirebaseUserId()).orElse(null);
+		if (user==null){
+			baseResponse.setMessage("email already used");
+			return baseResponse;
+		}
+		Set<Role> roles = new HashSet<>();
+		Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+				.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+		roles.add(userRole);
+		user = authMapper.fromCreateFormToAccount(createCustomerForm);
+		user.setRoles(roles);
+		user.setUsername(response.getBody().getUsers().get(0).getProviderUserInfo().get(0).getDisplayName());
+		baseResponse.setMessage("check success, this email can be used to register");
+		baseResponse.setResult(true);
 		baseResponse.setMessage("Register customer success");
 		return baseResponse;
 	}

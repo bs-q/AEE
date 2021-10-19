@@ -1,2 +1,3 @@
 .idea/
-target/
+/com-aee-service/target/
+*.iml
