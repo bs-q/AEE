@@ -1,7 +1,6 @@
 package com.aee.service.models.university;
 
 import com.aee.service.models.BaseModel;
-import com.aee.service.models.university.Field;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
