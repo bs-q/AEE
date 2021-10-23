@@ -11,7 +11,14 @@ import com.aee.service.models.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByUsername(String username);
 
+
+	Optional<User> findByEmail(String email);
+
 	Boolean existsByUsername(String username);
 
 	Boolean existsByEmail(String email);
+
+	Optional<User> findByTokenAndUid(String token, String uid);
+
+	Optional<User> findByUid(String uid);
 }
