@@ -1,12 +1,15 @@
 package com.aee.service.models.university;
 
 import com.aee.service.models.BaseModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Entity
+@Data
 public class University extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +42,8 @@ public class University extends BaseModel {
     private String description;
 
     @NotBlank
-    private String tag;
+    @OneToOne
+    private Tag tag;
 
     private Double rating;
 

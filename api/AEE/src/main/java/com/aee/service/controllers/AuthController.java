@@ -10,7 +10,6 @@ import com.aee.service.models.firebase.FbUserDetail;
 import com.aee.service.payload.request.FirebaseLoginRequest;
 import com.aee.service.payload.request.LoginRequest;
 import com.aee.service.payload.response.BaseResponse;
-import com.aee.service.payload.response.JwtResponse;
 import com.aee.service.payload.response.LoginResponse;
 import com.aee.service.repository.RoleRepository;
 import com.aee.service.repository.UserRepository;
@@ -23,7 +22,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,9 +32,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -66,7 +62,7 @@ public class AuthController {
 	@Autowired
 	AuthMapper authMapper;
 
-	@PostMapping(value = "/signin", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
 	public BaseResponse<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		Authentication authentication = null;
 		BaseResponse<LoginResponse> baseResponse = new BaseResponse<>();
@@ -142,7 +138,7 @@ public class AuthController {
 			return baseResponse;
 		}
 		Set<Role> roles = new HashSet<>();
-		Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+		Role userRole = roleRepository.findByName(ERole.USER)
 				.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 		roles.add(userRole);
 		FbUserDetail fbUserDetail = response.getBody().getUsers().get(0).getProviderUserInfo().get(0);
