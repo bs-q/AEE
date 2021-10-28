@@ -11,7 +11,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @SpringBootApplication
@@ -30,18 +32,27 @@ public class AEEServiceApplication {
 		SpringApplication.run(AEEServiceApplication.class, args);
 	}
 	@PostConstruct
+	@Transactional
 	public void initialize() {
 		createDefaultAdmin();
 	}
 	private void createDefaultAdmin(){
 		User user = userRepository.findByUsername("admin").orElse(null);
+		List<Role> roleList = roleRepository.findAll();
+		if (roleList.isEmpty()){
+			roleList.add(new Role(ERole.ADMIN));
+			roleList.add(new Role(ERole.USER));
+			roleList.add(new Role(ERole.MODERATOR));
+			roleRepository.saveAll(roleList);
+		}
+
 		if (user == null){
 			user = new User();
 			user.setUsername("admin");
 			user.setEmail("default@gmail.com");
 			user.setPassword(encoder.encode("admin"));
 			Set<Role> roles = new HashSet<>();
-			Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+			Role adminRole = roleRepository.findByName(ERole.ADMIN)
 					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 			roles.add(adminRole);
 			user.setRoles(roles);
