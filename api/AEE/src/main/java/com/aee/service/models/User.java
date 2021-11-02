@@ -45,7 +45,6 @@ public class User extends BaseModel {
 
 	private String uid;
 
-	private String token;
 
 	public User() {
 	}
