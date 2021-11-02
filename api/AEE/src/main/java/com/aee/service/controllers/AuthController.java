@@ -9,6 +9,7 @@ import com.aee.service.models.User;
 import com.aee.service.models.firebase.FbUserDetail;
 import com.aee.service.payload.request.FirebaseLoginRequest;
 import com.aee.service.payload.request.LoginRequest;
+import com.aee.service.payload.request.LoginWithGoogleRequest;
 import com.aee.service.payload.response.BaseResponse;
 import com.aee.service.payload.response.LoginResponse;
 import com.aee.service.repository.RoleRepository;
@@ -85,6 +86,27 @@ public class AuthController {
 		baseResponse.setResult(true);
 		return baseResponse;
 	}
+	@PostMapping(value = "/login-google", produces = MediaType.APPLICATION_JSON_VALUE)
+	public BaseResponse<LoginResponse> loginWithGoogle(@Valid @RequestBody LoginWithGoogleRequest loginRequest) {
+		Authentication authentication = null;
+		BaseResponse<LoginResponse> baseResponse = new BaseResponse<>();
+		User user = userRepository.findByUid(loginRequest.getUid()).orElse(null);
+
+		if (user == null){
+			baseResponse.setMessage("Not register");
+			return baseResponse;
+		}
+		authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(),user.getPassword()));
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		String jwt = jwtUtils.generateJwtToken(authentication);
+		LoginResponse response = authMapper.fromUserToLoginResponse(user);
+		response.setToken(jwt);
+		baseResponse.setData(response);
+		baseResponse.setMessage("Sign-in success");
+		baseResponse.setResult(true);
+		return baseResponse;
+	}
+
 
 
 	@PostMapping(value = "/check-register", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -105,7 +127,7 @@ public class AuthController {
 			return baseResponse;
 		}
 		User user = userRepository.findByUid(checkAccountForm.getFirebaseUserId()).orElse(null);
-		if (user==null){
+		if (user!=null){
 			baseResponse.setMessage("email already used");
 			return baseResponse;
 		}
@@ -133,7 +155,7 @@ public class AuthController {
 			return baseResponse;
 		}
 		User user = userRepository.findByUid(createCustomerForm.getFirebaseUserId()).orElse(null);
-		if (user==null){
+		if (user!=null){
 			baseResponse.setMessage("email already used");
 			return baseResponse;
 		}
@@ -147,6 +169,7 @@ public class AuthController {
 		user.setUsername(fbUserDetail.getDisplayName());
 		user.setPassword(encoder.encode(createCustomerForm.getPassword()));
 		user.setAvatarPath(fbUserDetail.getPhotoUrl());
+		userRepository.save(user);
 		baseResponse.setMessage("check success, this email can be used to register");
 		baseResponse.setResult(true);
 		baseResponse.setMessage("Register customer success");
