@@ -27,8 +27,10 @@ public class Field {
 
     private String description;
 
+    // tên ngành học, không được viết tắt
     private String name;
 
+    // tag: ngành công nghệ thông tin, tag = IT
     private String tag;
 
     // số tín chỉ
