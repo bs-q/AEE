@@ -1,6 +1,6 @@
 package com.aee.service.security.services;
 
-import com.aee.service.repository.UserRepository;
+import com.aee.service.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

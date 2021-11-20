@@ -26,7 +26,7 @@ public class University extends BaseModel {
     private String zone;
 
     //Chuyên ngành đào tạo
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     private List<Field> fields;
 
 

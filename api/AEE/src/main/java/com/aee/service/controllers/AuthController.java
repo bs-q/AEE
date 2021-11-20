@@ -12,8 +12,8 @@ import com.aee.service.payload.request.LoginRequest;
 import com.aee.service.payload.request.LoginWithGoogleRequest;
 import com.aee.service.payload.response.BaseResponse;
 import com.aee.service.payload.response.LoginResponse;
-import com.aee.service.repository.RoleRepository;
-import com.aee.service.repository.UserRepository;
+import com.aee.service.repository.role.RoleRepository;
+import com.aee.service.repository.user.UserRepository;
 import com.aee.service.security.jwt.JwtUtils;
 import com.aee.service.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,7 +160,7 @@ public class AuthController {
 			return baseResponse;
 		}
 		Set<Role> roles = new HashSet<>();
-		Role userRole = roleRepository.findByName(ERole.USER)
+		Role userRole = roleRepository.findByName(ERole.ROLE_USER)
 				.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 		roles.add(userRole);
 		FbUserDetail fbUserDetail = response.getBody().getUsers().get(0).getProviderUserInfo().get(0);
