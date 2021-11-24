@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReplyRepository extends JpaRepository<Reply,Long> {
-    Page<Reply> findByPostId(Long postId,Pageable paging);
+    Page<Reply> findByPostIdOrderByCreatedDate(Long postId,Pageable paging);
 }

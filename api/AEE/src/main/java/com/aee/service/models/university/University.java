@@ -44,7 +44,7 @@ public class University extends BaseModel {
     private String description;
 
     @NotBlank
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     // kí hiệu của trường, ví dụ trường đại học sư phạm kĩ thuật -> UTE
     private Tag tag;
 

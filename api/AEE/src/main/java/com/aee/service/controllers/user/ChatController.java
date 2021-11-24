@@ -9,6 +9,7 @@ import com.aee.service.payload.request.CreatePostRequest;
 import com.aee.service.payload.request.ReplyRequest;
 import com.aee.service.payload.response.BasePagingResponse;
 import com.aee.service.payload.response.BaseResponse;
+import com.aee.service.payload.response.PostResponse;
 import com.aee.service.payload.response.ReplyResponse;
 import com.aee.service.repository.post.PostRepository;
 import com.aee.service.repository.post.ReplyRepository;
@@ -73,16 +74,16 @@ public class ChatController extends BaseController {
         baseResponse.setMessage("Reply success");
         return baseResponse;
     }
-    @PostMapping(value = "/find-post", produces = MediaType.APPLICATION_JSON_VALUE)
-    public BaseResponse<String> findPost(@Valid @RequestParam Long postId) {
-        BaseResponse<String> baseResponse = new BaseResponse<>();
+    @GetMapping(value = "/find-post", produces = MediaType.APPLICATION_JSON_VALUE)
+    public BaseResponse<PostResponse> findPost(@Valid @RequestParam Long postId) {
+        BaseResponse<PostResponse> baseResponse = new BaseResponse<>();
         Post post = postRepository.findById(postId).orElse(null);
         if (post == null){
             baseResponse.setMessage("Post not found");
             return baseResponse;
         }
         baseResponse.setResult(true);
-        baseResponse.setData(post.getReplies().toString());
+        baseResponse.setData(chatMapper.fromPostToPostResponse(post));
         baseResponse.setMessage("Find post success");
         return baseResponse;
     }
@@ -93,11 +94,25 @@ public class ChatController extends BaseController {
                                                                @RequestParam Long postId) {
         BasePagingResponse<List<ReplyResponse>>baseResponse = new BasePagingResponse<>();
         Pageable paging = PageRequest.of(page, size);
-        Page<Reply> replies = replyRepository.findByPostId(postId,paging);
+        Page<Reply> replies = replyRepository.findByPostIdOrderByCreatedDate(postId,paging);
         baseResponse.setData(chatMapper.fromReplyListToReplyResponseList(replies.getContent()));
         baseResponse.setCurrentPage(replies.getNumber());
         baseResponse.setTotalPages(replies.getTotalPages());
         baseResponse.setTotalItems((int) replies.getTotalElements());
+        baseResponse.setResult(true);
+        return baseResponse;
+    }
+
+    @GetMapping(value = "/get-posts", produces = MediaType.APPLICATION_JSON_VALUE)
+    public BasePagingResponse<List<PostResponse>> listPosts(@Valid @RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "3") int size) {
+        BasePagingResponse<List<PostResponse>>baseResponse = new BasePagingResponse<>();
+        Pageable paging = PageRequest.of(page, size);
+        Page<Post> post = postRepository.findAll(paging);
+        baseResponse.setData(chatMapper.fromPostListToPostResponseList(post.getContent()));
+        baseResponse.setCurrentPage(post.getNumber());
+        baseResponse.setTotalPages(post.getTotalPages());
+        baseResponse.setTotalItems((int) post.getTotalElements());
         baseResponse.setResult(true);
         return baseResponse;
     }
