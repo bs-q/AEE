@@ -7,6 +7,6 @@ import java.util.Date;
 @Data
 public class ReplyResponse {
     private String content;
-    private String user;
+    private UserResponse user;
     private Date createdDate;
 }

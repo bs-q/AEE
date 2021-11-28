@@ -16,7 +16,7 @@ import java.util.List;
         })
 public interface ChatMapper {
     @Mapping(source = "content", target = "content")
-    @Mapping(source = "user.email", target = "user")
+    @Mapping(source = "user", target = "user", qualifiedByName = "fromUserToUserResponse")
     @Mapping(source = "createdDate",target = "createdDate")
     @BeanMapping(ignoreByDefault = true)
     ReplyResponse fromReplyToReplyResponse(Reply reply);

@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -63,8 +65,7 @@ public class ChatController extends BaseController {
             return baseResponse;
         }
         Reply reply = new Reply();
-        reply.setPost(post);
-        reply.setContent(reply.getContent());
+        reply.setContent(request.getContent());
         reply.setPost(post);
         User user = new User();
         user.setId(getUserDetails().getId());
@@ -92,10 +93,14 @@ public class ChatController extends BaseController {
     public BasePagingResponse<List<ReplyResponse>> listReplies(@Valid @RequestParam(defaultValue = "0") int page,
                                                                @RequestParam(defaultValue = "3") int size,
                                                                @RequestParam Long postId) {
-        BasePagingResponse<List<ReplyResponse>>baseResponse = new BasePagingResponse<>();
+        BasePagingResponse<List<ReplyResponse>> baseResponse = new BasePagingResponse<>();
         Pageable paging = PageRequest.of(page, size);
         Page<Reply> replies = replyRepository.findByPostIdOrderByCreatedDate(postId,paging);
-        baseResponse.setData(chatMapper.fromReplyListToReplyResponseList(replies.getContent()));
+        if (replies.hasContent()){
+            baseResponse.setData(chatMapper.fromReplyListToReplyResponseList(replies.getContent()));
+        } else {
+            baseResponse.setData(new ArrayList<>());
+        }
         baseResponse.setCurrentPage(replies.getNumber());
         baseResponse.setTotalPages(replies.getTotalPages());
         baseResponse.setTotalItems((int) replies.getTotalElements());
@@ -108,7 +113,7 @@ public class ChatController extends BaseController {
                                                                @RequestParam(defaultValue = "3") int size) {
         BasePagingResponse<List<PostResponse>>baseResponse = new BasePagingResponse<>();
         Pageable paging = PageRequest.of(page, size);
-        Page<Post> post = postRepository.findAll(paging);
+        Page<Post> post = postRepository.findAllByOrderByCreatedDateDesc(paging);
         baseResponse.setData(chatMapper.fromPostListToPostResponseList(post.getContent()));
         baseResponse.setCurrentPage(post.getNumber());
         baseResponse.setTotalPages(post.getTotalPages());
