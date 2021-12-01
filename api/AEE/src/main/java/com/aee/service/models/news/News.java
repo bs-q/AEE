@@ -37,6 +37,8 @@ public class News extends BaseModel {
 
     private String titles;
 
+    private String thumbnail;
+
     /**
      * Tag of news
      * for searching purpose, tag must be match with university tag

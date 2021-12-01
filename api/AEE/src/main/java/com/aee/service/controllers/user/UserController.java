@@ -1,10 +1,11 @@
 package com.aee.service.controllers.user;
 
 import com.aee.service.controllers.base.BaseController;
+import com.aee.service.mapper.UniversityMapper;
+import com.aee.service.models.university.Field;
 import com.aee.service.models.university.University;
-import com.aee.service.payload.response.BasePagingResponse;
-import com.aee.service.payload.response.BaseResponse;
-import com.aee.service.payload.response.ProfileResponse;
+import com.aee.service.payload.response.*;
+import com.aee.service.repository.university.FieldRepository;
 import com.aee.service.repository.university.UniversityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.List;
 
 import static com.aee.service.repository.university.UniversitySpecification.hasName;
@@ -26,6 +28,13 @@ public class UserController extends BaseController {
 
     @Autowired
     UniversityRepository universityRepository;
+
+    @Autowired
+    UniversityMapper universityMapper;
+
+    @Autowired
+    FieldRepository fieldRepository;
+
 
 
     @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,12 +53,12 @@ public class UserController extends BaseController {
     }
 
     @GetMapping(value = "/list-university", produces = MediaType.APPLICATION_JSON_VALUE)
-    public BasePagingResponse<List<University>> listUniversity(@Valid @RequestParam(defaultValue = "0") int page,
-                                                                             @RequestParam(defaultValue = "3") int size) {
-        BasePagingResponse<List<University>>baseResponse = new BasePagingResponse<>();
+    public BasePagingResponse<List<UniversityResponse>> listUniversity(@Valid @RequestParam(defaultValue = "0") int page,
+                                                                       @RequestParam(defaultValue = "3") int size) {
+        BasePagingResponse<List<UniversityResponse>>baseResponse = new BasePagingResponse<>();
         Pageable paging = PageRequest.of(page, size);
         Page<University> universities = universityRepository.findAll(paging);
-        baseResponse.setData(universities.getContent());
+        baseResponse.setData(universityMapper.fromUniversityListToUniversityListResponse(universities.getContent()));
         baseResponse.setCurrentPage(universities.getNumber());
         baseResponse.setTotalPages(universities.getTotalPages());
         baseResponse.setTotalItems((int) universities.getTotalElements());
@@ -67,6 +76,18 @@ public class UserController extends BaseController {
             universities = universityRepository.findAll(inZone(zone));
         }
         baseResponse.setData(universities);
+        baseResponse.setResult(true);
+        return baseResponse;
+    }
+    @GetMapping(value = "/list-field/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public BaseResponse<List<FieldResponse>> getField(@PathVariable long id) {
+        BaseResponse<List<FieldResponse>> baseResponse = new BaseResponse<>();
+        List<Field> fieldResponses = fieldRepository.findAllByUniversityId(id).orElse(null);
+        if (fieldResponses == null){
+            baseResponse.setData(Collections.emptyList());
+        } else {
+            baseResponse.setData(universityMapper.fromFieldListToFieldListResponse(fieldResponses));
+        }
         baseResponse.setResult(true);
         return baseResponse;
     }
