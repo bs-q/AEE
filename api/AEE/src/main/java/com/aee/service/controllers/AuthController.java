@@ -96,7 +96,7 @@ public class AuthController {
 			baseResponse.setMessage("Not register");
 			return baseResponse;
 		}
-		authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(),user.getPassword()));
+		authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(),"google"));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		LoginResponse response = authMapper.fromUserToLoginResponse(user);
