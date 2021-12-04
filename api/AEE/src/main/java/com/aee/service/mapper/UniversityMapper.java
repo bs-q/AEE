@@ -9,6 +9,7 @@ import com.aee.service.payload.response.UniversityResponse;
 import org.mapstruct.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface UniversityMapper {
@@ -25,11 +26,15 @@ public interface UniversityMapper {
     @BeanMapping(ignoreByDefault = true)
     UniversityResponse fromUniversityToUniversityResponse(University university);
 
+    @Mapping(source = "university.name", target = "universityName")
+    @Mapping(source = "university.image",target = "universityImg")
     FieldResponse fromFieldToFieldResponse(Field field);
 
     @IterableMapping(elementTargetType = FieldResponse.class)
     List<FieldResponse> fromFieldListToFieldListResponse(List<Field> fields);
 
+    @IterableMapping(elementTargetType = FieldResponse.class)
+    Set<FieldResponse> fromFieldListToFieldListResponse(Set<Field> fields);
 
     @IterableMapping(elementTargetType = UniversityResponse.class)
     List<UniversityResponse> fromUniversityListToUniversityListResponse(List<University> universities);

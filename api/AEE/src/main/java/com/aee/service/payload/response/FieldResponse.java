@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class FieldResponse {
+
+    private Long id;
     // hệ đào tạo
     private String type;
 
@@ -25,4 +27,8 @@ public class FieldResponse {
 
     // số tín chỉ
     private Integer credits;
+
+    private String universityName;
+
+    private String universityImg;
 }

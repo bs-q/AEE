@@ -1,9 +1,11 @@
 package com.aee.service.models;
 
+import com.aee.service.models.university.Field;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -44,6 +46,9 @@ public class User extends BaseModel {
 	private String avatarPath;
 
 	private String uid;
+
+	@OneToMany
+	private Set<Field> favorite;
 
 
 	public User() {
