@@ -22,10 +22,11 @@ public class University extends BaseModel {
     private String address;
 
     @NotBlank
+    // khu vực, miền bắc, nam, ...
     private String zone;
 
     //Chuyên ngành đào tạo
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     private List<Field> fields;
 
 
@@ -39,14 +40,19 @@ public class University extends BaseModel {
     private String website;
 
     @NotBlank
+    // Mô tả về trường
     private String description;
 
     @NotBlank
-    @OneToOne
+    private String image;
+
+
+    @NotBlank
+    @OneToOne(fetch = FetchType.LAZY)
+    // kí hiệu của trường, ví dụ trường đại học sư phạm kĩ thuật -> UTE
     private Tag tag;
 
+    // field này tạm thời để trống
     private Double rating;
-
-
 
 }

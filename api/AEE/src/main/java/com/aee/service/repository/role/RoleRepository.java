@@ -1,4 +1,4 @@
-package com.aee.service.repository;
+package com.aee.service.repository.role;
 
 import java.util.Optional;
 

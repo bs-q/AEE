@@ -32,8 +32,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
-        builder.serializationInclusion(JsonInclude.Include.NON_NULL);
-        builder.serializationInclusion(JsonInclude.Include.NON_EMPTY);
+//        builder.serializationInclusion(JsonInclude.Include.NON_NULL);
+//        builder.serializationInclusion(JsonInclude.Include.NON_EMPTY);
         builder.dateFormat(new SimpleDateFormat(DATE_TIME_FORMAT));
         builder.serializers(new LocalDateSerializer(DateTimeFormatter.ofPattern(DATE_FORMAT)));
         builder.serializers(new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));

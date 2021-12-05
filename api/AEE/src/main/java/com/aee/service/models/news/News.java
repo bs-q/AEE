@@ -30,6 +30,14 @@ public class News extends BaseModel {
     private String content;
 
 
+    /**
+     * Url of news from other pages
+     * */
+    private String url;
+
+    private String titles;
+
+    private String thumbnail;
 
     /**
      * Tag of news

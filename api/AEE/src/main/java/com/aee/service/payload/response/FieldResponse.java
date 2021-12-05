@@ -1,19 +1,11 @@
-package com.aee.service.models.university;
+package com.aee.service.payload.response;
 
 import lombok.Data;
 
-import javax.persistence.*;
-
-@Entity
 @Data
-public class Field {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class FieldResponse {
+
     private Long id;
-
-    @ManyToOne
-    University university;
-
     // hệ đào tạo
     private String type;
 
@@ -36,4 +28,7 @@ public class Field {
     // số tín chỉ
     private Integer credits;
 
+    private String universityName;
+
+    private String universityImg;
 }

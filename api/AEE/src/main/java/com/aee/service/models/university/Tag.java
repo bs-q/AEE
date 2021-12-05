@@ -15,6 +15,7 @@ public class Tag extends BaseModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // tag của trường
     private String name;
 
 }
