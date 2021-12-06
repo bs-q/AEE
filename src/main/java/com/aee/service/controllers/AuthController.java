@@ -16,6 +16,7 @@ import com.aee.service.repository.role.RoleRepository;
 import com.aee.service.repository.user.UserRepository;
 import com.aee.service.security.jwt.JwtUtils;
 import com.aee.service.security.services.UserDetailsImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -23,6 +24,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
+import java.io.Console;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,6 +41,7 @@ import java.util.Set;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
+@Slf4j
 public class AuthController {
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -96,8 +100,14 @@ public class AuthController {
 			baseResponse.setMessage("Not register");
 			return baseResponse;
 		}
-		authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(),"google"));
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		try {
+			authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(),"GOOGLE", AuthorityUtils.createAuthorityList("ROLE_USER")));
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		} catch (AuthenticationException e){
+			log.error(e.toString());
+			baseResponse.setMessage("Wrong password");
+			return baseResponse;
+		}
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		LoginResponse response = authMapper.fromUserToLoginResponse(user);
 		response.setToken(jwt);
