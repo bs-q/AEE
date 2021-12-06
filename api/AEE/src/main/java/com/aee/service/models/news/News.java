@@ -33,10 +33,13 @@ public class News extends BaseModel {
     /**
      * Url of news from other pages
      * */
+    @Column(columnDefinition="TEXT")
     private String url;
 
+    @Column(columnDefinition="TEXT")
     private String titles;
 
+    @Column(columnDefinition="TEXT")
     private String thumbnail;
 
     /**

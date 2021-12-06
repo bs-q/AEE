@@ -17,8 +17,10 @@ public class Post extends BaseModel {
     @ManyToOne
     private User creator;
 
+    @Column(columnDefinition="TEXT")
     private String title;
 
+    @Column(columnDefinition="TEXT")
     private String content;
 
     private Integer vote;

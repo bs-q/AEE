@@ -19,6 +19,7 @@ public class University extends BaseModel {
     private String name;
 
     @NotBlank
+    @Column(columnDefinition="TEXT")
     private String address;
 
     @NotBlank
@@ -41,9 +42,11 @@ public class University extends BaseModel {
 
     @NotBlank
     // Mô tả về trường
+    @Column(columnDefinition="TEXT")
     private String description;
 
     @NotBlank
+    @Column(columnDefinition="TEXT")
     private String image;
 
 

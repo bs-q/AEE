@@ -19,6 +19,7 @@ public class Reply extends BaseModel {
     @ManyToOne
     private Post post;
 
+    @Column(columnDefinition="TEXT")
     private String content;
 
 }
