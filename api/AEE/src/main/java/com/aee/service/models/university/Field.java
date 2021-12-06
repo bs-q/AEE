@@ -25,6 +25,7 @@ public class Field {
 
     private Integer year;
 
+    @Column(columnDefinition="TEXT")
     private String description;
 
     // tên ngành học, không được viết tắt
